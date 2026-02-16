@@ -1,6 +1,6 @@
 # Survival Analysis Pipeline for Recidivism Modeling
 
-## 📌 Project Overview
+## Project Overview
 
 This project implements a modular and extensible survival analysis pipeline for modeling recidivism risk using recurrent-event Cox proportional hazards models.
 
@@ -17,18 +17,7 @@ The architecture follows clean software engineering principles and is designed t
 
 ---
 
-# 🎯 Research Objective
-
-The objective of this project is to model time-to-reoffense (recidivism) using survival analysis techniques while:
-
-- Handling recurrent events per individual  
-- Avoiding data leakage via individual-level splitting  
-- Evaluating predictive quality using time-dependent survival metrics  
-- Supporting extensibility for future experimentation  
-
----
-
-# 🏗 Project Architecture
+# Project Architecture
 
 ```graphql
 project/
@@ -61,8 +50,8 @@ project/
 
 ---
 
-# 📂 Folder and File Descriptions
-## 🔹 data/
+# Folder and File Descriptions
+## data/
 
 ### `data_processor.py`
 
@@ -90,7 +79,7 @@ Performs:
 Why individual-level splitting is required:
 Each offender has multiple episodes. Splitting by row would cause leakage.
 ---
-## 🔹 models/
+## models/
 ### `base_model.py`
 Defines the abstract interface:
 ```python
@@ -114,7 +103,7 @@ Example:
 model = CoxModel(features=["age"])
 ```
 ---
-## 🔹 metrics/
+## metrics/
 Defines modular evaluation metrics.
 Each metric:
 - Inherits from `BaseMetric`
@@ -136,7 +125,7 @@ Computes:
 - Per-individual AUPRC
 - Mean AUPRC
 ---
-## 🔹 pipeline/
+## pipeline/
 ### `trainer.py`
 Responsible for:
 - Training models
@@ -157,7 +146,7 @@ reports/csv/
 reports/plots/
 ```
 ---
-## 🔹 reports/
+## reports/
 Automatically generated evaluation results.
 **CSV outputs**:
 individual_metrics.csv
@@ -167,7 +156,7 @@ model_summary.csv
 **Plots**:
 ibs_time_plot.png
 ---
-## 🔹 main.py
+## main.py
 Main execution script.
 Workflow:
 1. Load and preprocess data
@@ -184,7 +173,7 @@ Workflow:
 
 ---
 
-# 🔬 Train/Test Methodology
+# Train/Test Methodology
 The dataset is split by individual (`name`):
 - 80% train
 - 20% test
@@ -195,7 +184,7 @@ Evaluation metrics are computed strictly on the test set.
 
 ---
 
-# 📊 Evaluation Metrics
+# Evaluation Metrics
 The following metrics are computed:
 **Global metrics**:
 - Mean Integrated Brier Score (IBS)
@@ -210,16 +199,16 @@ The following metrics are computed:
 
 ---
 
-# ▶ How to Run
+# How to Run
 From project root:
 ```bash
-python main.py
+python3 main.py
 ```
 Generated output will appear in: `reports\`
 
 ---
 
-# 🔧 How to Add a New Model
+# How to Add a New Model
 1. Create a new file in models/
 2. Inherit from BaseSurvivalModel
 3. Implement:
@@ -232,7 +221,7 @@ No other changes required.
 
 ---
 
-# 🔧 How to Add a New Metric
+# How to Add a New Metric
 1. Create new file in metrics/
 2. Inherit from BaseMetric
 3. Implement compute()
