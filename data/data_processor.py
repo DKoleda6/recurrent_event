@@ -57,6 +57,8 @@ class DataProcessor:
         cox_df = pd.DataFrame(cox_data)
 
         eps = 1e-6
+        cox_df["entry"] = cox_df["entry"].astype(float)
+        cox_df["dur"] = cox_df["dur"].astype(float)
         mask = cox_df['entry'] >= cox_df['dur']
         cox_df.loc[mask, 'dur'] = cox_df.loc[mask, 'entry'] + eps
 

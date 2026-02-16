@@ -10,9 +10,9 @@ class CoxModel(BaseSurvivalModel):
             df=df,
             covariates=self.features,
             id_col="name",
-            episode_col="episode_col",
+            episode_col=None,
             start_col="entry",
-            stop_col="dur",
+            stop_col="time",
             event_col="event"
         )
 

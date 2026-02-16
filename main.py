@@ -18,7 +18,7 @@ from survivors.constants import get_y
 # 1. Load Data
 # ==============================
 
-processor = DataProcessor("individual_custody_timeline_rfm.csv")
+processor = DataProcessor("data/individual_custody_timeline_rfm.csv")
 cox_df = processor.load_and_prepare()
 
 # ==============================
