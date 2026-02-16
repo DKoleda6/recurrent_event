@@ -1,5 +1,3 @@
-# models/base_model.py
-
 from abc import ABC, abstractmethod
 
 class BaseSurvivalModel(ABC):

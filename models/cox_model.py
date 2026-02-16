@@ -1,5 +1,3 @@
-# models/cox_model.py
-
 from src.mirecsurv_py.core import fit_stratified_cox
 from .base_model import BaseSurvivalModel
 

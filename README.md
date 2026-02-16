@@ -20,11 +20,12 @@ The architecture follows clean software engineering principles and is designed t
 # Project Architecture
 
 ```graphql
-project/
+whole_process/
 │
 ├── data/
 │ ├── data_processor.py
-│ └── splitter.py
+│ ├── splitter.py
+│ └── individual_custody_timeline_rfm.csv
 │
 ├── models/
 │ ├── base_model.py
@@ -69,7 +70,7 @@ Responsible for:
 Outputs: `cox_df`
 Which is the fully prepared survival modeling dataset.
 ---
-### `data_processor.py`
+### `splitter.py`
 Implements: `SurvivalSplitter`
 
 Performs:

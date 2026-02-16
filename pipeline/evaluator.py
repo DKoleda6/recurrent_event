@@ -21,10 +21,7 @@ class SurvivalEvaluator:
         auprc
     ):
 
-        # ==============================
         # Per-individual metrics
-        # ==============================
-
         individual_df = pd.DataFrame({
             "individual_id": predictions.index,
             "ibs_remain": ibs_remain,
@@ -36,10 +33,7 @@ class SurvivalEvaluator:
             index=False
         )
 
-        # ==============================
         # IBS over time
-        # ==============================
-
         ibs_time_df = pd.DataFrame({
             "time": times,
             "ibs_error": ibs_by_time
@@ -50,10 +44,7 @@ class SurvivalEvaluator:
             index=False
         )
 
-        # ==============================
         # Summary metrics
-        # ==============================
-
         summary_df = pd.DataFrame({
             "metric": ["Mean IBS", "Mean AUPRC"],
             "value": [mean_ibs, np.mean(auprc)]
@@ -64,10 +55,7 @@ class SurvivalEvaluator:
             index=False
         )
 
-        # ==============================
         # Plot IBS
-        # ==============================
-
         plt.figure(figsize=(10, 6))
         plt.plot(times, ibs_by_time)
         plt.axhline(y=mean_ibs, linestyle="--")
