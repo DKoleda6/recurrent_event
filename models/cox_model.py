@@ -13,6 +13,7 @@ class CoxModel(BaseSurvivalModel):
             stop_col="time",
             event_col="event"
         )
+        self.model.print_summary()
 
     def predict_survival(self, df, times):
         surv = self.model.predict_survival_function(df, times=times)
