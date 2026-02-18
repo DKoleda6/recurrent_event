@@ -53,8 +53,9 @@ class DataProcessor:
                     'age': row['age'],
                     'sex': row['sex'],
                     'race': row['race'],
-                    #'custody_num': row['custody_num'],
-                    #'sum_dur_custody': row['sum_dur_custody'],
+                    'time_since_last_arrest': row['time_since_last_arrest'],
+                    'average_dur_custody': row['average_dur_custody'],
+                    #'c_charge_degree': row['c_charge_degree'],
                     'curr_dur_custody': row['curr_dur_custody']
                 })
 
