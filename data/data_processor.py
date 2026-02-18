@@ -51,6 +51,10 @@ class DataProcessor:
                     'dur': dur_list[i],
                     'event': event_list[i],
                     'age': row['age'],
+                    'sex': row['sex'],
+                    'race': row['race'],
+                    #'custody_num': row['custody_num'],
+                    #'sum_dur_custody': row['sum_dur_custody'],
                     'curr_dur_custody': row['curr_dur_custody']
                 })
 
