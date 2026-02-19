@@ -1,0 +1,95 @@
+Metadata-Version: 2.1
+Name: mirecsurv-py
+Version: 0.1.0
+Summary: Core recurrent-event modeling tools inspired by miRecSurv (R), for Python.
+License: MIT
+Project-URL: Homepage, https://github.com/yourname/mirecsurv-py
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: numpy>=1.23
+Requires-Dist: pandas>=1.5
+Requires-Dist: lifelines>=0.27
+Requires-Dist: scipy>=1.9
+
+# miRecSurv-Py
+A lightweight Python reimplementation of the core recurrent-event modeling workflow from the R package miRecSurv.
+
+### Overview
+miRecSurv-Py reproduces the essential functionality of the R package miRecSurv, including:
+- Episode-stratified Cox proportional hazards modeling
+- Gap-time or calendar-time formulation
+- Automatic construction of start/stop intervals
+- Cluster-robust standard errors as a practical substitute for frailty
+- Multiple imputation pooling via Rubin’s rules
+- Clean, modular Python API built on lifelines
+
+The package does not include COM-Poisson imputation or gamma-frailty estimation yet, but both can be added in extensions.
+
+### Installation
+Clone the repo and install locally:
+```bash
+pip install -e .
+```
+Required dependencies:
+- numpy
+- pandas
+- lifelines
+- scipy
+
+### Example
+```python
+import pandas as pd
+from mirecsurv_py import fit_rec_ev_model
+
+# Example: model for one or many imputed datasets
+dfs = [df1, df2, df3]   # list of DataFrames
+
+result = fit_rec_ev_model(
+    imputed_dfs=dfs,
+    covariates=['x'],
+    id_col='id',
+    time_col='time',
+    event_col='event',
+    episode_col='episode',
+)
+
+print(result['pooled']['pooled_table'])
+```
+
+### Main Functions
+prepare_gap_time(df, id_col, time_col, event_col, episode_col)
+- Creates start/stop times for each event episode.
+
+fit_stratified_cox(...)
+- Fits an episode-stratified Cox model using lifelines.
+
+fit_rec_ev_model(...)
+- High-level workflow for recurrent-event models with multiple imputation.
+
+rubins_rules_from_models(models)
+- Pools multiple fitted models using Rubin’s rules.
+
+### Folder Structure
+```plaintext
+src/mirecsurv_py/
+    core.py        – model-fitting logic
+    utils.py       – pooling (Rubin’s rules)
+    io.py          – load imputations
+    cli.py         – command-line wrapper
+    __init__.py    – public API
+
+docs/
+    usage.md       - “manual” for the library
+
+examples/
+    example_recurrent_events.py    -runnable script showing how to:
+                                    generate synthetic data, create imputations,
+                                    fit your model, print pooled table
+                                    
+tests/
+    test_core.py   - minimal unit test, tests:
+                     gap-time computation,
+                     correct first start time (0)
+```
+Documentation is available in docs/usage.md.
