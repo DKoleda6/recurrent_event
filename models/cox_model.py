@@ -23,3 +23,8 @@ class CoxModel(BaseSurvivalModel):
     def predict_survival(self, df, times):
         surv = self.model.predict_survival_function(df, times=times)
         return surv.T
+    
+    def predict_cumulative_hazard(self, df, times):
+        ch = self.model.predict_cumulative_hazard(df, times=times)
+        return ch
+
