@@ -53,11 +53,11 @@ def fit_stratified_cox(df: pd.DataFrame,
     df_fit = df.copy()
 
     # Required columns
-    needed = [stop_col, event_col] + covariates + [id_col]
-    if episode_col is not None:
-        needed.append(episode_col)
-    if start_col:
-        needed.insert(0, start_col)
+    needed = []
+
+    for col in [id_col, start_col, stop_col, event_col, episode_col]:
+        if col is not None:
+            needed.append(col)
 
     missing = [c for c in needed if c not in df_fit.columns]
     if missing:
@@ -81,7 +81,7 @@ def fit_stratified_cox(df: pd.DataFrame,
         fit_args["entry_col"] = start_col
 
     # Robust sandwich variance via cluster_col
-    if robust:
+    if robust and id_col is not None:
         fit_args["cluster_col"] = id_col
 
     # Strata
