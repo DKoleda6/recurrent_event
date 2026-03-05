@@ -41,7 +41,7 @@ class CoxModelUpd(BaseSurvivalModel):
                 id_col=None,
                 episode_col=None,
                 start_col=None,
-                stop_col="time",
+                stop_col="duration",
                 event_col="event",
                 robust=False
             )
