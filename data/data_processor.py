@@ -17,16 +17,14 @@ class DataProcessor:
 
     def load_and_prepare(self):
         df = pd.read_csv(self.filepath)
-
         df['all_future_arrest_times'] = df['all_future_arrest_times'].apply(self.safe_literal_eval)
         df['all_future_events'] = df['all_future_events'].apply(self.safe_literal_eval)
 
         df_sorted = df.sort_values(['name', 'in_custody']).reset_index(drop=True)
-        df_first_row = df_sorted.groupby('name').first().reset_index()
+        df_first_row = df_sorted#.groupby('name').first().reset_index()
         df_first_row = df_first_row[
             df_first_row['all_future_arrest_times'].apply(len) > 0
         ]
-
         cox_df = self.build_cox_dataframe(df_first_row)
 
         return cox_df

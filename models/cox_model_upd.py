@@ -1,11 +1,9 @@
 import sys
 import os
 
-# Add the project root to sys.path (so Python finds 'src' and 'models')
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, project_root)
 
-# Replace relative import with absolute import (no '.')
 from src.mirecsurv_py.core import fit_stratified_cox
 from models.base_model import BaseSurvivalModel 
 
@@ -15,11 +13,13 @@ class CoxModelUpd(BaseSurvivalModel):
         self,
         features,
         mode="recurrent",   # so this would be "recurrent" or "independent"
-        use_episode=False
+        use_episode=False,
+        penalizer=0.0
     ):
         super().__init__(features)
         self.mode = mode
         self.use_episode = use_episode
+        self.penalizer = penalizer
 
 
     def fit(self, df):
@@ -31,7 +31,8 @@ class CoxModelUpd(BaseSurvivalModel):
                 episode_col="episode_col" if self.use_episode else None,
                 start_col="entry",
                 stop_col="time",
-                event_col="event"
+                event_col="event",
+                penalizer=self.penalizer
             )
 
         elif self.mode == "independent":
@@ -43,7 +44,8 @@ class CoxModelUpd(BaseSurvivalModel):
                 start_col=None,
                 stop_col="duration",
                 event_col="event",
-                robust=False
+                robust=False,
+                penalizer=self.penalizer
             )
 
         else:
