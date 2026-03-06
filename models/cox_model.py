@@ -9,8 +9,8 @@ class CoxModel(BaseSurvivalModel):
             covariates=self.features,
             id_col="name",
             episode_col=None,
-            start_col="entry",
-            stop_col="time",
+            start_col="start",
+            stop_col="stop",
             event_col="event"
         )
         self.model.print_summary()

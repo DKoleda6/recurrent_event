@@ -29,8 +29,8 @@ class CoxModelUpd(BaseSurvivalModel):
                 covariates=self.features,
                 id_col="name",
                 episode_col="episode_col" if self.use_episode else None,
-                start_col="entry",
-                stop_col="time",
+                start_col="start",
+                stop_col="stop",
                 event_col="event",
                 penalizer=self.penalizer
             )
@@ -42,7 +42,7 @@ class CoxModelUpd(BaseSurvivalModel):
                 id_col=None,
                 episode_col=None,
                 start_col=None,
-                stop_col="duration",
+                stop_col="time",
                 event_col="event",
                 robust=False,
                 penalizer=self.penalizer

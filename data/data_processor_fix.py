@@ -52,8 +52,8 @@ class DataProcessor:
                 cox_data.append({
                     'name': person_name,
                     'episode_col': episode_col,
-                    'entry': entry,
-                    'dur': dur,
+                    'start': entry,
+                    'stop': dur,
                     'event': event,
                     'age': covar_row['age'],
                     'time_since_last_arrest': covar_row['time_since_last_arrest'],
