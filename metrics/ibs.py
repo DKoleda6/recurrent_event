@@ -5,7 +5,7 @@ class IBSMetric(BaseMetric):
 
     def compute(self, survival_train, survival_test, estimate, times):
 
-        mean_ibs = metrics.ibs(
+        mean_ibs = metrics.ibs_remain(
             survival_train=survival_train,
             survival_test=survival_test,
             estimate=estimate,
@@ -13,7 +13,7 @@ class IBSMetric(BaseMetric):
             axis=-1
         )
 
-        ibs_by_time = metrics.ibs(
+        ibs_by_time = metrics.ibs_remain(
             survival_train=survival_train,
             survival_test=survival_test,
             estimate=estimate,

@@ -9,6 +9,5 @@ class AUPRCMetric(BaseMetric):
             survival_train=survival_train,
             survival_test=survival_test,
             estimate=estimate,
-            times=times,
-            axis=0
+            times=times
         )
