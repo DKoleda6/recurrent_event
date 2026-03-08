@@ -1,9 +1,10 @@
 import numpy as np
 import pandas as pd
+from survivors.constants import get_y
 from lifelines.utils import concordance_index
+from metrics.recurrent_count_error import RecurrentCountError
 
 class SurvivalEvaluator:
-
     def __init__(self, ibs_metric, auprc_metric):
         self.ibs_metric = ibs_metric
         self.auprc_metric = auprc_metric
@@ -15,95 +16,46 @@ class SurvivalEvaluator:
         model_name,
         train_df,
         test_df,
-        #feature_col,
-        duration_col,
-        event_col,
-        times=None
-    ):
-
-        # time grid
-        train_dur = train_df[duration_col]
-        if times is None:
-            horizon = np.quantile(train_dur, 0.95)
-            times = np.linspace(0, horizon, 200)
-        times = np.asarray(times, dtype=np.float64)
-
-        # predictions
-        predictions = model.predict_survival(
-            test_df,
-            times
-        )
+        features,
+        times,
+        duration_col="time",
+        event_col="event",
+    ):  
+        predictions = model.predict_survival(test_df[features], times)
         estimate = predictions.values.astype(np.float64)
 
-        test_dur = test_df[duration_col]
+        survival_test = get_y(time=test_df[duration_col], cens=test_df[event_col].astype(bool))
+        survival_train = get_y(time=train_df[duration_col], cens=train_df[event_col].astype(bool))
 
-        # fixing format
-        survival_test = np.array(
-            list(zip(
-                test_df[event_col].astype(bool),
-                test_dur.astype(float)
-            )),
-            dtype=[("event", "?"), ("time", "f8")]
-        )
+        mean_ibs, _ = self.ibs_metric.compute(survival_train, survival_test, estimate, times)
+        mean_auprc = self.auprc_metric.compute(survival_train, survival_test, estimate, times)
 
-        survival_train = np.array(
-            list(zip(
-                train_df[event_col].astype(bool),
-                train_dur.astype(float)
-            )),
-            dtype=[("event", "?"), ("time", "f8")]
-        )
-
-        # IBS
-        mean_ibs, _ = self.ibs_metric.compute(
-            survival_train,
-            survival_test,
-            estimate,
-            times
-        )
-
-        # AUPRC
-        survival_test_cens = np.array(
-            list(zip(
-                ~test_df[event_col].astype(bool),
-                test_dur.astype(float)
-            )),
-            dtype=[("cens", "?"), ("time", "f8")]
-        )
-
-        survival_train_cens = np.array(
-            list(zip(
-                ~train_df[event_col].astype(bool),
-                train_dur.astype(float)
-            )),
-            dtype=[("cens", "?"), ("time", "f8")]
-        )
-
-        auprc = self.auprc_metric.compute(
-            survival_train_cens,
-            survival_test_cens,
-            estimate,
-            times
-        )
-
-        mean_auprc = np.mean(auprc)
-
-        # concordance
         ci = concordance_index(
-            test_dur,
+            survival_test["time"],
             np.trapz(estimate, times, axis=1),
             test_df[event_col]
         )
 
-        # storing results
+        tr_pred = model.predict_cumulative_hazard(train_df, times)
+        tr_max = np.quantile(tr_pred.max(), 0.9)
+        pred = model.predict_cumulative_hazard(test_df, times)
+        
+        recerr = RecurrentCountError()
+        recurrent_error = recerr.compute(
+            survival_train=None,
+            survival_test=test_df,
+            estimate=pred / tr_max,
+            times=times
+        )
+
         self.results.append({
             "model": model_name,
             "IBS": mean_ibs,
             "AUPRC": mean_auprc,
-            "C-index": ci
+            "C-index": ci,
+            "recurrent_error": recurrent_error
         })
-
-        return mean_ibs, mean_auprc, ci
+        return mean_ibs, mean_auprc, ci, recurrent_error
 
 
     def get_results_table(self):

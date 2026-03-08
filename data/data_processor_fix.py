@@ -56,6 +56,9 @@ class DataProcessor:
                     'stop': dur,
                     'event': event,
                     'age': covar_row['age'],
+                    'sex': covar_row['sex'],
+                    'race': covar_row['race'],
+                    'c_charge_degree': covar_row['c_charge_degree'],
                     'time_since_last_arrest': covar_row['time_since_last_arrest'],
                     'average_dur_custody': covar_row['average_dur_custody'],
                     'curr_dur_custody': covar_row['curr_dur_custody']
@@ -65,6 +68,11 @@ class DataProcessor:
                 episode_col += 1
 
         cox_df = pd.DataFrame(cox_data)
+        eps = 1e-6
+        cox_df["start"] = cox_df["start"].astype(float)
+        cox_df["stop"] = cox_df["stop"].astype(float)
+        mask = cox_df['start'] >= cox_df['stop']
+        cox_df.loc[mask, 'stop'] = cox_df.loc[mask, 'start'] + eps
         #cox_df['average_dur_custody'] = cox_df['average_dur_custody'].round(2)
 
         return cox_df
