@@ -6,6 +6,12 @@ from models.base_model import BaseSurvivalModel
 
 
 class RSFModel(BaseSurvivalModel):
+    def __init__(self, features, mode="independent", use_episode=None, **params):
+        super().__init__(features)
+        self.params = params
+        self.mode = mode
+        self.use_episode = use_episode
+        self.model = RandomSurvivalForest(**params)
 
     def fit(self, df):
         X = df[self.features]
@@ -13,14 +19,6 @@ class RSFModel(BaseSurvivalModel):
             event="event",
             time="time",
             data=df
-        )
-
-        self.model = RandomSurvivalForest(
-            n_estimators=200,
-            min_samples_split=10,
-            min_samples_leaf=5,
-            n_jobs=-1,
-            random_state=42
         )
         self.model.fit(X, y)
 

@@ -14,12 +14,12 @@ class CoxModelUpd(BaseSurvivalModel):
         features,
         mode="recurrent",   # so this would be "recurrent" or "independent"
         use_episode=False,
-        penalizer=0.0
+        **params
     ):
         super().__init__(features)
         self.mode = mode
         self.use_episode = use_episode
-        self.penalizer = penalizer
+        self.params = params
 
 
     def fit(self, df):
@@ -32,7 +32,7 @@ class CoxModelUpd(BaseSurvivalModel):
                 start_col="start",
                 stop_col="stop",
                 event_col="event",
-                penalizer=self.penalizer
+                **self.params
             )
 
         elif self.mode == "independent":
@@ -45,14 +45,13 @@ class CoxModelUpd(BaseSurvivalModel):
                 stop_col="time",
                 event_col="event",
                 robust=False,
-                penalizer=self.penalizer
+                **self.params
             )
 
         else:
             raise ValueError("mode must be 'recurrent' or 'independent'")
         self.model.print_summary()
         print(type(self.model))
-
 
 
     def predict_survival(self, df, times):
