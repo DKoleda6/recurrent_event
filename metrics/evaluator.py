@@ -37,7 +37,7 @@ class SurvivalEvaluator:
         )
 
         recurrent_error = None
-        if model_name != "Random Survival Forest":
+        if model_name != "RSF_no_episode_col":
             tr_pred = model.predict_cumulative_hazard(train_df, times)
             tr_max = np.quantile(tr_pred.max(), 0.9)
 
