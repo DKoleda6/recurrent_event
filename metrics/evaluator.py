@@ -36,17 +36,20 @@ class SurvivalEvaluator:
             test_df[event_col]
         )
 
-        tr_pred = model.predict_cumulative_hazard(train_df, times)
-        tr_max = np.quantile(tr_pred.max(), 0.9)
-        pred = model.predict_cumulative_hazard(test_df, times)
-        
-        recerr = RecurrentCountError()
-        recurrent_error = recerr.compute(
-            survival_train=None,
-            survival_test=test_df,
-            estimate=pred / tr_max,
-            times=times
-        )
+        recurrent_error = None
+        if model_name != "Random Survival Forest":
+            tr_pred = model.predict_cumulative_hazard(train_df, times)
+            tr_max = np.quantile(tr_pred.max(), 0.9)
+
+            pred = model.predict_cumulative_hazard(test_df, times)
+
+            recerr = RecurrentCountError()
+            recurrent_error = recerr.compute(
+                survival_train=None,
+                survival_test=test_df,
+                estimate=pred / tr_max,
+                times=times
+            )
 
         self.results.append({
             "model": model_name,
