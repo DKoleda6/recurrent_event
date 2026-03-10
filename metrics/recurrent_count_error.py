@@ -11,8 +11,8 @@ class RecurrentCountError(BaseMetric):
         if not isinstance(estimate, pd.DataFrame):
             estimate = pd.DataFrame(
                 estimate,
-                index=times,
-                columns=test_df.index
+                index=test_df.index,
+                columns=times
             )
 
         errors = []
@@ -30,11 +30,8 @@ class RecurrentCountError(BaseMetric):
                 t_mask = times >= row["time"]
                 obs_matrix[t_mask, person_ind[row_i]] += 1
 
-
-
         for t_ind, t in enumerate(times):
-
-            row_preds = estimate.iloc[t_ind].values
+            row_preds = estimate[times[t_ind]].values
 
             temp = pd.DataFrame({
                 "name": test_df["name"].values,

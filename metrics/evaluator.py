@@ -35,21 +35,26 @@ class SurvivalEvaluator:
             np.trapz(estimate, times, axis=1),
             test_df[event_col]
         )
-
+        
         recurrent_error = None
-        if model_name != "RSF_no_episode_col":
+        try:
             tr_pred = model.predict_cumulative_hazard(train_df, times)
             tr_max = np.quantile(tr_pred.max(), 0.9)
-
             pred = model.predict_cumulative_hazard(test_df, times)
+            pred_array = pred.values if isinstance(pred, pd.DataFrame) else pred
+            if pred_array.shape[0] == len(times) and pred_array.shape[1] == len(test_df):
+                pred_array = pred_array.T
 
             recerr = RecurrentCountError()
             recurrent_error = recerr.compute(
                 survival_train=None,
                 survival_test=test_df,
-                estimate=pred / tr_max,
+                estimate=pred_array / tr_max,
                 times=times
             )
+        except Exception as e:
+            print(f"Warning: Recurrent error failed for {model_name}: {str(e)}")
+            recurrent_error = np.nan 
 
         self.results.append({
             "model": model_name,
