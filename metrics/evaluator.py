@@ -3,6 +3,7 @@ import pandas as pd
 from survivors.constants import get_y
 from lifelines.utils import concordance_index
 from metrics.recurrent_count_error import RecurrentCountError
+from metrics.iauc_re1 import IAUCRE1
 
 class SurvivalEvaluator:
     def __init__(self, ibs_metric, auprc_metric):
@@ -35,7 +36,7 @@ class SurvivalEvaluator:
             np.trapz(estimate, times, axis=1),
             test_df[event_col]
         )
-        
+
         recurrent_error = None
         try:
             tr_pred = model.predict_cumulative_hazard(train_df, times)
@@ -46,7 +47,7 @@ class SurvivalEvaluator:
                 pred_array = pred_array.T
 
             recerr = RecurrentCountError()
-            recurrent_error = recerr.compute(
+            recurrent_error, obs_matrix, name_to_ind = recerr.compute(
                 survival_train=None,
                 survival_test=test_df,
                 estimate=pred_array / tr_max,
@@ -54,16 +55,27 @@ class SurvivalEvaluator:
             )
         except Exception as e:
             print(f"Warning: Recurrent error failed for {model_name}: {str(e)}")
-            recurrent_error = np.nan 
+            recurrent_error = np.nan
+
+        iaucre_metric = IAUCRE1()
+        iauc_re = iaucre_metric.compute(
+            survival_train=None,
+            survival_test=test_df,
+            estimate=pred_array / tr_max,
+            times=times,
+            obs_matrix=obs_matrix,
+            name_to_ind=name_to_ind
+        )
 
         self.results.append({
             "model": model_name,
             "IBS": mean_ibs,
             "AUPRC": mean_auprc,
             "C-index": ci,
-            "recurrent_error": recurrent_error
+            "recurrent_error": recurrent_error,
+            "IAUC_RE": iauc_re
         })
-        return mean_ibs, mean_auprc, ci, recurrent_error
+        return mean_ibs, mean_auprc, ci, recurrent_error, iauc_re
 
 
     def get_results_table(self):
