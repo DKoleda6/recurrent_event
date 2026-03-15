@@ -47,7 +47,7 @@ class SurvivalEvaluator:
                 pred_array = pred_array.T
 
             recerr = RecurrentCountError()
-            recurrent_error, obs_matrix, name_to_ind = recerr.compute(
+            recurrent_error = recerr.compute(
                 survival_train=None,
                 survival_test=test_df,
                 estimate=pred_array / tr_max,
@@ -62,9 +62,7 @@ class SurvivalEvaluator:
             survival_train=None,
             survival_test=test_df,
             estimate=pred_array / tr_max,
-            times=times,
-            obs_matrix=obs_matrix,
-            name_to_ind=name_to_ind
+            times=times
         )
 
         self.results.append({

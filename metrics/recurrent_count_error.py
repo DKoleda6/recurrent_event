@@ -54,4 +54,4 @@ class RecurrentCountError(BaseMetric):
 
         integrated_error = np.trapz(errors, times) / (times[-1] - times[0])
 
-        return integrated_error, obs_matrix, name_to_ind
+        return integrated_error

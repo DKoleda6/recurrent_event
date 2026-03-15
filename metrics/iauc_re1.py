@@ -3,7 +3,7 @@ import pandas as pd
 from .base_metric import BaseMetric
 
 class IAUCRE1(BaseMetric):
-    def compute(self, survival_train, survival_test, estimate, times, obs_matrix, name_to_ind):
+    def compute(self, survival_train, survival_test, estimate, times):
         test_df = survival_test.copy()
         if not isinstance(estimate, pd.DataFrame):
             estimate = pd.DataFrame(estimate, index=test_df.index, columns=times)
@@ -11,6 +11,17 @@ class IAUCRE1(BaseMetric):
         auc_re_per_time = []
         person_names = test_df["name"].unique()
         pred_by_person = []
+        
+        n_people = len(person_names)
+        name_to_ind = {name: i for i, name in enumerate(person_names)}
+        person_ind = test_df["name"].map(name_to_ind).values
+        obs_matrix = np.zeros((len(times), n_people))
+
+        for row_i, row in test_df.iterrows():
+            if row["event"] == 1:
+                t_mask = times >= row["time"]
+                obs_matrix[t_mask, person_ind[row_i]] += 1
+
         for t in times:
             row_preds = estimate[t].values
             pred_sum = test_df.groupby("name")[t].sum() if t in test_df.columns else \
