@@ -4,6 +4,8 @@ from survivors.constants import get_y
 from lifelines.utils import concordance_index
 from metrics.recurrent_count_error import RecurrentCountError
 from metrics.iauc_re1 import IAUCRE1
+from metrics.iauc_re2 import IAUCRE2
+from metrics.iauc_re3 import IAUCRE3
 
 class SurvivalEvaluator:
     def __init__(self, ibs_metric, auprc_metric):
@@ -57,8 +59,22 @@ class SurvivalEvaluator:
             print(f"Warning: Recurrent error failed for {model_name}: {str(e)}")
             recurrent_error = np.nan
 
-        iaucre_metric = IAUCRE1()
-        iauc_re = iaucre_metric.compute(
+        iaucre_metric1 = IAUCRE1()
+        iauc_re1 = iaucre_metric1.compute(
+            survival_train=None,
+            survival_test=test_df,
+            estimate=pred_array / tr_max,
+            times=times
+        )
+        iaucre_metric2 = IAUCRE2()
+        iauc_re2 = iaucre_metric2.compute(
+            survival_train=None,
+            survival_test=test_df,
+            estimate=pred_array / tr_max,
+            times=times
+        )
+        iaucre_metric3 = IAUCRE3()
+        iauc_re3 = iaucre_metric3.compute(
             survival_train=None,
             survival_test=test_df,
             estimate=pred_array / tr_max,
@@ -71,9 +87,11 @@ class SurvivalEvaluator:
             "AUPRC": mean_auprc,
             "C-index": ci,
             "recurrent_error": recurrent_error,
-            "IAUC_RE": iauc_re
+            "IAUC_RE1": iauc_re1,
+            "IAUC_RE2": iauc_re2,
+            "IAUC_RE3": iauc_re3
         })
-        return mean_ibs, mean_auprc, ci, recurrent_error, iauc_re
+        return mean_ibs, mean_auprc, ci, recurrent_error, iauc_re1, iauc_re2, iauc_re3
 
 
     def get_results_table(self):

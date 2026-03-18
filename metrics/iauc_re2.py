@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from .base_metric import BaseMetric
 
-class IAUCRE1(BaseMetric):
+class IAUCRE2(BaseMetric):
     def compute(self, survival_train, survival_test, estimate, times):
         test_df = survival_test.copy()
         if not isinstance(estimate, pd.DataFrame):
@@ -22,22 +22,23 @@ class IAUCRE1(BaseMetric):
                 t_mask = times >= row["time"]
                 obs_matrix[t_mask, person_ind[row_i]] += 1
 
-        # commented out section just sums all H(...)
-        # for t in times:
-        #     row_preds = estimate[t].values
-        #     pred_sum = test_df.groupby("name")[t].sum() if t in test_df.columns else \
-        #                pd.Series(row_preds, index=test_df["name"]).groupby(level=0).sum()
-        #     pred_counts = pred_sum.reindex(person_names).values
-        #     pred_by_person.append(pred_counts)
-
         for t in times:
-            completed_mask = test_df["stop"] <= t # make sure we summing only episodes that finished
-            current_preds = estimate.loc[completed_mask, t].values
-            current_names = test_df.loc[completed_mask, "name"]
-        
-            pred_sum = pd.Series(current_preds, index=current_names).groupby(level=0).sum()
-            pred_counts = pred_sum.reindex(person_names, fill_value=0).values
-            pred_by_person.append(pred_counts)
+            person_scores = {}
+            for name in person_names:
+                person_episodes = test_df[test_df["name"] == name].copy()
+                total_risk = 0.0
+                for idx, ep in person_episodes.iterrows():
+                    stop_ep = ep["stop"]
+                    
+                    if stop_ep <= t: #add the episodes that passed
+                        t_prev = max([tp for tp in times if tp <= stop_ep])
+                        total_risk += estimate.loc[idx, t_prev]
+                    else: #add the still active episode
+                        total_risk += estimate.loc[idx, t]
+                        break
+                person_scores[name] = total_risk
+            pred_counts = np.array([person_scores[name] for name in person_names]) #array of values for time t
+            pred_by_person.append(pred_counts) #matrix that consists of all the arrays at times t0, t1, ...
 
         pred_by_person = np.array(pred_by_person)
 

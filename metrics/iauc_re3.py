@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from .base_metric import BaseMetric
 
-class IAUCRE1(BaseMetric):
+class IAUCRE3(BaseMetric):
     def compute(self, survival_train, survival_test, estimate, times):
         test_df = survival_test.copy()
         if not isinstance(estimate, pd.DataFrame):
@@ -22,21 +22,15 @@ class IAUCRE1(BaseMetric):
                 t_mask = times >= row["time"]
                 obs_matrix[t_mask, person_ind[row_i]] += 1
 
-        # commented out section just sums all H(...)
-        # for t in times:
-        #     row_preds = estimate[t].values
-        #     pred_sum = test_df.groupby("name")[t].sum() if t in test_df.columns else \
-        #                pd.Series(row_preds, index=test_df["name"]).groupby(level=0).sum()
-        #     pred_counts = pred_sum.reindex(person_names).values
-        #     pred_by_person.append(pred_counts)
+        first_indices = test_df.groupby("name").head(1).index
+        estimate_first = estimate.loc[first_indices]
 
         for t in times:
-            completed_mask = test_df["stop"] <= t # make sure we summing only episodes that finished
-            current_preds = estimate.loc[completed_mask, t].values
-            current_names = test_df.loc[completed_mask, "name"]
-        
-            pred_sum = pd.Series(current_preds, index=current_names).groupby(level=0).sum()
-            pred_counts = pred_sum.reindex(person_names, fill_value=0).values
+            pred_sum = pd.Series(
+                estimate_first[t].values,
+                index=test_df.loc[first_indices, "name"]
+            )
+            pred_counts = pred_sum.reindex(person_names).values
             pred_by_person.append(pred_counts)
 
         pred_by_person = np.array(pred_by_person)
