@@ -5,6 +5,7 @@ from .base_metric import BaseMetric
 class IAUCRE3(BaseMetric):
     def compute(self, survival_train, survival_test, estimate, times):
         test_df = survival_test.copy()
+        test_df.reset_index(drop=True, inplace=True)
         if not isinstance(estimate, pd.DataFrame):
             estimate = pd.DataFrame(estimate, index=test_df.index, columns=times)
 
@@ -18,9 +19,11 @@ class IAUCRE3(BaseMetric):
         obs_matrix = np.zeros((len(times), n_people))
 
         for row_i, row in test_df.iterrows():
+            t_mask = times >= row["stop"]
             if row["event"] == 1:
-                t_mask = times >= row["time"]
                 obs_matrix[t_mask, person_ind[row_i]] += 1
+            # else:
+            #     obs_matrix[t_mask, person_ind[row_i]] = np.nan
 
         first_indices = test_df.groupby("name").head(1).index
         estimate_first = estimate.loc[first_indices]
@@ -44,7 +47,7 @@ class IAUCRE3(BaseMetric):
             pred_j = np.tile(pred_counts[np.newaxis, :], (len(pred_counts), 1))
 
             valid_mask = obs_i > obs_j
-            correct_mask = pred_i >= pred_j
+            correct_mask = pred_i > pred_j
             denominator = np.sum(valid_mask)
             numerator = np.sum(valid_mask & correct_mask)
 
