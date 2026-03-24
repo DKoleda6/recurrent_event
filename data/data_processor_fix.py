@@ -60,7 +60,7 @@ class DataProcessor:
                     'race': covar_row['race'],
                     'c_charge_degree': covar_row['c_charge_degree'],
                     'time_since_last_arrest': covar_row['time_since_last_arrest'],
-                    'average_dur_custody': covar_row['average_dur_custody'],
+                    #'average_dur_custody': covar_row['average_dur_custody'],
                     'curr_dur_custody': covar_row['curr_dur_custody']
                 })
 
