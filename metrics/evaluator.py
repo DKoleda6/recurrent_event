@@ -39,7 +39,7 @@ class SurvivalEvaluator:
             test_df[event_col]
         )
 
-        recurrent_error = None
+        # recurrent_error = None
         try:
             tr_pred = model.predict_cumulative_hazard(train_df, times)
             tr_max = np.quantile(tr_pred.max(), 0.9)
@@ -48,16 +48,16 @@ class SurvivalEvaluator:
             if pred_array.shape[0] == len(times) and pred_array.shape[1] == len(test_df):
                 pred_array = pred_array.T
 
-            recerr = RecurrentCountError()
-            recurrent_error = recerr.compute(
-                survival_train=None,
-                survival_test=test_df,
-                estimate=pred_array / tr_max,
-                times=times
-            )
+        #     recerr = RecurrentCountError()
+        #     recurrent_error = recerr.compute(
+        #         survival_train=None,
+        #         survival_test=test_df,
+        #         estimate=pred_array / tr_max,
+        #         times=times
+        #     )
         except Exception as e:
             print(f"Warning: Recurrent error failed for {model_name}: {str(e)}")
-            recurrent_error = np.nan
+        #     recurrent_error = np.nan
 
         iaucre_metric1 = IAUCRE1()
         iauc_re1 = iaucre_metric1.compute(
@@ -86,12 +86,12 @@ class SurvivalEvaluator:
             "IBS": mean_ibs,
             "AUPRC": mean_auprc,
             "C-index": ci,
-            "recurrent_error": recurrent_error,
+            #"recurrent_error": recurrent_error,
             "IAUC_RE1": iauc_re1,
             "IAUC_RE2": iauc_re2,
             "IAUC_RE3": iauc_re3
         })
-        return mean_ibs, mean_auprc, ci, recurrent_error, iauc_re1, iauc_re2, iauc_re3
+        return mean_ibs, mean_auprc, ci, iauc_re1, iauc_re2, iauc_re3
 
 
     def get_results_table(self):
