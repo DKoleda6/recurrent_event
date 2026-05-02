@@ -28,7 +28,7 @@ class RFMFeatures:
     def custom_rfm(self, df):
         df = df.copy()
         
-        df['log_curr_dur_custody'] = np.log1p(df['curr_dur_hosp'])
+        df['log_curr_dur_hosp'] = np.log1p(df['curr_dur_hosp'])
         df['dur_deviation_from_avg'] = df['curr_dur_hosp'] - df['curr_dur_hosp_mean']
         def is_increasing(row):
             history = row['curr_dur_hosp_history']

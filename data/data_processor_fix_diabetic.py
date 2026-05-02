@@ -7,64 +7,68 @@ class DataProcessor:
         self.filepath = filepath
 
     def load_and_prepare(self):
-        """Загружает данные и строит Cox-таблицу как в твоей рабочей функции"""
-        # Загружаем CSV
         df = pd.read_csv(self.filepath)
         
-        # Сортируем как в оригинале
-        df_sorted = df.sort_values(["patient_nbr", "encounter_id"]).reset_index(drop=True)
+        df_sorted = df.sort_values(['patient_nbr', 'DATE']).reset_index(drop=True)
         
-        # Строим эпизодическую таблицу
         cox_df = self.build_cox_dataframe(df_sorted)
-        
+
         return cox_df
 
     def build_cox_dataframe(self, df_sorted):
-        """Точная копия логики из build_episode_based_timeline"""
-        df = df_sorted.copy()
+        cox_data = []
+        
+        unique_patients = df_sorted['patient_nbr'].unique()
+
+        for patient_id in unique_patients:
+            patient_rows = df_sorted[df_sorted['patient_nbr'] == patient_id].reset_index(drop=True)
+            
+            if len(patient_rows) == 0:
+                continue
+
+            episode_num = 1
+            
+            for idx, row in patient_rows.iterrows():
+                cox_data.append({
+                    'patient_id': patient_id,
+                    'episode_col': episode_num,
+                    #'start': row['start'],
+                    #'stop': row['stop'],
+                    'start': row['start_days'],
+                    'stop': row['stop_days'],
+                    'event': row['event'],
+                    
+                    'race': row['race'],
+                    'gender': row['gender'],
+                    'age': row['age'],
+                    #'weight': row['weight'],
+                    
+                    'admission_type_id': row['admission_type_id'],
+                    'discharge_disposition_id': row['discharge_disposition_id'],
+                    'admission_source_id': row['admission_source_id'],
+                    'curr_dur_hosp': row['time_in_hospital'],
+
+                    'num_lab_procedures': row['num_lab_procedures'],
+                    'num_procedures': row['num_procedures'],
+                    'num_medications': row['num_medications'],
+                    'number_outpatient': row['number_outpatient'],
+                    'number_emergency': row['number_emergency'],
+                    'number_inpatient': row['number_inpatient'],
+                    'number_diagnoses': row['number_diagnoses'],
+                    
+                    'diabetesMed': row['diabetesMed'],
+                    'insulin': row['insulin'],
+                    'change': row['change'],
+                    #'readmitted': row['readmitted']
+                })
+                
+                episode_num += 1
+
+        cox_df = pd.DataFrame(cox_data)
         eps = 1e-6
-
-        # Номер эпизода (1,2,3...)
-        df["episode_col"] = df.groupby("patient_nbr").cumcount() + 1
-
-        # Кумулятивное время в больнице
-        cum_time = df.groupby("patient_nbr")["time_in_hospital"].cumsum()
-
-        # Start = 0 для первого эпизода
-        df["start"] = cum_time.groupby(df["patient_nbr"]).shift(fill_value=0)
-
-        # Stop = start + текущая длительность
-        df["stop"] = df["start"] + df["time_in_hospital"]
-
-        # Исправляем некорректные интервалы
-        mask = df['start'] >= df['stop']
-        df.loc[mask, 'stop'] = df.loc[mask, 'start'] + eps
-
-        # Событие: 1 если повторная госпитализация
-        df["event"] = df["readmitted"].apply(lambda x: 1 if x in ["<30", ">30"] else 0)
-
-        # Кодируем пол
-        df["sex"] = df["gender"].map({"Female": 0, "Male": 1})
-
-        # Оставляем только нужные столбцы + переименовываем
-        cox_df = df[[
-            "patient_nbr",
-            "episode_col",
-            "start",
-            "stop",
-            "event",
-            "age",
-            "sex",
-            "race",
-            "medical_specialty",
-            "time_in_hospital"
-        ]].rename(columns={
-            "patient_nbr": "patient_id",
-            "time_in_hospital": "curr_dur_hosp"
-        })
-
-        # Типы данных
         cox_df["start"] = cox_df["start"].astype(float)
         cox_df["stop"] = cox_df["stop"].astype(float)
+        mask = cox_df['start'] >= cox_df['stop']
+        cox_df.loc[mask, 'stop'] = cox_df.loc[mask, 'start'] + eps
 
         return cox_df
